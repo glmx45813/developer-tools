@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt模板库 - 开发者工具集</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/favicon.svg}">
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css(v=${#dates.createNow().time})}">
+    <link rel="stylesheet" th:href="@{/css/prompt-template.css(v=${#dates.createNow().time})}">
+</head>
+<body>
+    <button class="mobile-toggle" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i>
+    </button>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    
+    <div class="app-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a th:href="@{/}" class="sidebar-logo" title="返回首页">
+                    <i class="bi bi-house"></i>
+                    <span>开发者工具集</span>
+                </a>
+            </div>
+            
+            <div class="sidebar-search">
+                <i class="bi bi-search search-icon"></i>
+                <input type="password" style="position:absolute;opacity:0;pointer-events:none;" aria-hidden="true">
+                <input type="text" class="search-input" id="template-search" placeholder="搜索模板..." oninput="searchTemplates(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            </div>
+            
+            <div class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">
+                        <span><i class="bi bi-folder me-2"></i>模板分类</span>
+                    </div>
+                    <ul class="nav-section-items" id="category-list">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" data-category="" onclick="filterByCategory('')">
+                                <i class="bi bi-grid"></i>
+                                <span>全部模板</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h3><i class="bi bi-collection"></i> Prompt模板库</h3>
+                        <p class="text-muted">精选高质量Prompt模板，助力AI对话更高效</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn-primary" onclick="showCreateModal()">
+                            <i class="bi bi-plus-lg"></i> 创建模板
+                        </button>
+                    </div>
+                </div>
+
+                <div class="hot-templates-section" id="hot-section">
+                    <h5><i class="bi bi-fire text-danger"></i> 热门模板</h5>
+                    <div class="hot-templates-list" id="hot-templates"></div>
+                </div>
+
+                <div class="templates-section">
+                    <div class="templates-header">
+                        <h5><i class="bi bi-grid-3x3-gap"></i> 全部模板</h5>
+                        <span class="template-count" id="template-count">共 0 个模板</span>
+                    </div>
+                    <div class="templates-grid" id="templates-grid"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal fade" id="templateModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal-title">创建模板</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="template-form">
+                        <input type="hidden" id="template-id">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">模板名称 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="template-name" required placeholder="例如：代码审查助手">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">分类 <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="template-category" required>
+                                        <option value="">选择分类</option>
+                                        <option value="开发辅助">开发辅助</option>
+                                        <option value="文本处理">文本处理</option>
+                                        <option value="写作助手">写作助手</option>
+                                        <option value="面试准备">面试准备</option>
+                                        <option value="数据分析">数据分析</option>
+                                        <option value="AI技巧">AI技巧</option>
+                                        <option value="数据库">数据库</option>
+                                        <option value="其他">其他</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">描述</label>
+                            <input type="text" class="form-control" id="template-description" placeholder="简要描述模板用途">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">模板内容 <span class="text-danger">*</span></label>
+                            <textarea class="form-control font-monospace" id="template-content" rows="10" required placeholder="输入Prompt模板内容，使用 {{变量名}} 表示变量"></textarea>
+                            <div class="form-text">使用 {{变量名}} 格式定义变量，例如：{{code}}、{{language}}</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">标签</label>
+                            <input type="text" class="form-control" id="template-tags" placeholder="多个标签用逗号分隔，例如：代码,优化,重构">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveTemplate()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="useTemplateModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="use-modal-title">使用模板</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="template-preview-header">
+                        <h6 id="preview-template-name"></h6>
+                        <p class="text-muted" id="preview-template-desc"></p>
+                    </div>
+                    <div id="variables-form"></div>
+                    <div class="template-preview-content">
+                        <label class="form-label">预览</label>
+                        <pre id="preview-content"></pre>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-outline-primary" onclick="copyTemplateContent()">
+                        <i class="bi bi-clipboard"></i> 复制内容
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="useInAIChat()">
+                        <i class="bi bi-chat-dots"></i> 在AI对话中使用
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detail-modal-title">模板详情</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="detail-section">
+                        <div class="detail-item">
+                            <span class="detail-label">名称</span>
+                            <span class="detail-value" id="detail-name"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">分类</span>
+                            <span class="detail-value"><span class="badge bg-primary" id="detail-category"></span></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">描述</span>
+                            <span class="detail-value" id="detail-description"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">使用次数</span>
+                            <span class="detail-value" id="detail-usage"></span>
+                        </div>
+                    </div>
+                    <div class="detail-content-section">
+                        <label class="form-label">模板内容</label>
+                        <pre class="detail-content" id="detail-content"></pre>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-outline-primary" onclick="copyDetailContent()">
+                        <i class="bi bi-clipboard"></i> 复制
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="useTemplateFromDetail()">
+                        <i class="bi bi-play-fill"></i> 使用模板
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="bi bi-info-circle me-2" id="toast-icon"></i>
+                <strong class="me-auto" id="toast-title">提示</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="toast-message"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">const API_BASE = /*[[${#httpServletRequest.contextPath}]]*/ '';</script>
+    <script th:src="@{/js/prompt-template.js(v=${#dates.createNow().time})}"></script>
+</body>
+</html>

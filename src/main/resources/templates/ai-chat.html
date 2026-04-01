@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI对话 - 开发者工具集</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/favicon.svg}">
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css(v=${#dates.createNow().time})}">
+    <link rel="stylesheet" th:href="@{/css/ai-chat-page.css(v=${#dates.createNow().time})}">
+</head>
+<body>
+    <div class="chat-app-container">
+        <aside class="chat-sidebar" id="chat-sidebar">
+            <div class="sidebar-header">
+                <a th:href="@{/}" class="sidebar-logo" title="返回首页">
+                    <i class="bi bi-house"></i>
+                    <span>开发者工具集</span>
+                </a>
+                <button class="btn btn-sm btn-outline-light" onclick="createNewChat()">
+                    <i class="bi bi-plus-lg"></i> 新对话
+                </button>
+            </div>
+            
+            <div class="sidebar-search">
+                <i class="bi bi-search"></i>
+                <input type="password" style="position:absolute;opacity:0;pointer-events:none;" aria-hidden="true">
+                <input type="text" placeholder="搜索对话..." id="chat-search" oninput="searchChats(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            </div>
+            
+            <div class="chat-history-list" id="chat-history-list">
+                <div class="empty-history">
+                    <i class="bi bi-chat-square-text"></i>
+                    <p>暂无对话历史</p>
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <a th:href="@{/prompt-template}" class="btn btn-outline-light btn-sm w-100">
+                    <i class="bi bi-collection"></i> Prompt模板库
+                </a>
+            </div>
+        </aside>
+        
+        <button class="sidebar-toggle" onclick="toggleSidebar()">
+            <i class="bi bi-list"></i>
+        </button>
+
+        <main class="chat-main">
+            <div class="chat-config-bar" id="config-bar">
+                <div class="config-row">
+                    <div class="config-item">
+                        <label>提供商</label>
+                        <select class="form-select form-select-sm" id="ai-provider" onchange="onProviderChange(this.value)">
+                            <option value="">选择提供商</option>
+                            <option value="openai">OpenAI</option>
+                            <option value="qwen">通义千问</option>
+                            <option value="moonshot">Moonshot (Kimi)</option>
+                            <option value="doubao">豆包</option>
+                        </select>
+                    </div>
+                    <div class="config-item">
+                        <label>API Key</label>
+                        <div class="input-group input-group-sm">
+                            <input type="password" class="form-control" id="ai-apikey" placeholder="输入API Key" autocomplete="off" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly');">
+                            <button class="btn btn-outline-secondary" type="button" onclick="toggleApiKeyVisibility()" title="显示/隐藏">
+                                <i class="bi bi-eye" id="apikey-toggle-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="config-item">
+                        <label>模型</label>
+                        <select class="form-select form-select-sm" id="ai-model">
+                            <option value="">请先选择提供商</option>
+                        </select>
+                    </div>
+                    <div class="config-item" id="doubao-endpoint-group" style="display:none;">
+                        <label>Endpoint ID</label>
+                        <input type="text" class="form-control form-control-sm" id="ai-endpoint" placeholder="模型端点ID" autocomplete="off">
+                    </div>
+                    <div class="config-item">
+                        <label>Temperature</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="range" class="form-range" id="ai-temperature" min="0" max="2" step="0.1" value="0.7" style="width: 80px;">
+                            <span id="temp-value" style="min-width: 24px;">0.7</span>
+                        </div>
+                    </div>
+                    <div class="config-item">
+                        <label>Max Tokens</label>
+                        <input type="number" class="form-control form-control-sm" id="ai-max-tokens" value="2048" style="width: 100px;">
+                    </div>
+                    <div class="config-item">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="ai-stream" checked>
+                            <label class="form-check-label" for="ai-stream">流式输出</label>
+                        </div>
+                    </div>
+                    <div class="config-item">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="toggleConfigPanel()">
+                            <i class="bi bi-gear"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-config-panel" id="config-panel" style="display:none;">
+                <div class="panel-content">
+                    <h6><i class="bi bi-sliders"></i> 高级设置</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">System Prompt</label>
+                                <textarea class="form-control" id="system-prompt" rows="3" placeholder="设置系统提示词..."></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Top P</label>
+                                <input type="number" class="form-control" id="ai-top-p" value="1" min="0" max="1" step="0.1">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Stop Sequences</label>
+                                <input type="text" class="form-control" id="ai-stop" placeholder="逗号分隔">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-messages-container">
+                <div class="chat-messages" id="chat-messages">
+                    <div class="welcome-message">
+                        <div class="welcome-icon">
+                            <i class="bi bi-robot"></i>
+                        </div>
+                        <h4>欢迎使用AI助手</h4>
+                        <p>选择提供商，输入API Key，选择模型后开始对话</p>
+                        <div class="welcome-features">
+                            <div class="feature-item">
+                                <i class="bi bi-chat-text"></i>
+                                <span>智能对话</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="bi bi-image"></i>
+                                <span>图片识别</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="bi bi-mic"></i>
+                                <span>语音输入</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="bi bi-code-slash"></i>
+                                <span>代码高亮</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <div id="multimodal-preview" class="multimodal-preview" style="display:none;"></div>
+                <div class="chat-input-wrapper" id="chat-input-wrapper">
+                    <div class="input-actions-left">
+                        <button class="chat-action-btn" type="button" onclick="toggleMultimodalMenu()" title="添加附件">
+                            <i class="bi bi-paperclip"></i>
+                        </button>
+                        <button class="chat-action-btn" type="button" onclick="openPromptLibrary()" title="Prompt模板库">
+                            <i class="bi bi-collection"></i>
+                        </button>
+                        <div class="multimodal-menu" id="multimodal-menu" style="display:none;">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectImageFile()">
+                                <i class="bi bi-image"></i> 图片
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAudioFile()">
+                                <i class="bi bi-mic"></i> 音频
+                            </button>
+                            <input type="file" id="multimodal-file-input" accept="image/*,audio/*" style="display:none;" onchange="handleMultimodalFile(this)">
+                        </div>
+                    </div>
+                    <textarea id="chat-input" rows="1" placeholder="输入消息... (支持拖拽图片、音频文件，Shift+Enter换行)" autocomplete="off" spellcheck="false"></textarea>
+                    <div class="input-actions-right">
+                        <button class="chat-action-btn optimize-btn" type="button" onclick="optimizePrompt()" title="优化提示词">
+                            <i class="bi bi-magic"></i>
+                        </button>
+                        <button class="chat-action-btn send-btn" id="send-btn" onclick="sendMessage()" title="发送消息">
+                            <i class="bi bi-send-fill"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="input-footer">
+                    <span class="token-count" id="token-count">Token: 0</span>
+                    <span class="shortcut-hint">Enter发送 / Shift+Enter换行</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="bi bi-info-circle me-2" id="toast-icon"></i>
+                <strong class="me-auto" id="toast-title">提示</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="toast-message"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/marked/9.1.6/marked.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script th:inline="javascript">const API_BASE = /*[[${#httpServletRequest.contextPath}]]*/ '';</script>
+    <script th:src="@{/js/ai-chat-page.js(v=${#dates.createNow().time})}"></script>
+</body>
+</html>

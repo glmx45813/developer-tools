@@ -1,0 +1,2409 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no">
+    <title>开发者工具集</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/favicon.svg}">
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css(v=${#dates.createNow().time})}">
+</head>
+<body>
+    <button class="mobile-toggle" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i>
+    </button>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    
+    <div class="app-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a th:href="@{/}" class="sidebar-logo" title="返回首页">
+                    <i class="bi bi-house"></i>
+                    <span class="sidebar-title">开发者工具集</span>
+                </a>
+                <button class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="折叠侧边栏">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+            </div>
+            
+            <div class="sidebar-search">
+                <i class="bi bi-search search-icon"></i>
+                <input type="password" style="position:absolute;opacity:0;pointer-events:none;" aria-hidden="true">
+                <input type="text" class="search-input" id="tool-search" placeholder="搜索工具..." oninput="filterTools(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            </div>
+            
+            <div class="sidebar-nav">
+                <div class="nav-section" data-section="home">
+                    <ul class="nav-section-items">
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/ai-chat}">
+                                <i class="bi bi-chat-dots"></i>
+                                <span>AI对话</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/prompt-template}">
+                                <i class="bi bi-collection"></i>
+                                <span>Prompt模板库</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section" data-section="crypto">
+                    <div class="nav-section-title" onclick="toggleSection(this)">
+                        <span><i class="bi bi-shield-lock me-2"></i>加密工具</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                    <ul class="nav-section-items">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="md5">
+                                <i class="bi bi-key"></i>
+                                <span>MD5加密</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="sha256">
+                                <i class="bi bi-shield-check"></i>
+                                <span>SHA256加密</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="aes">
+                                <i class="bi bi-lock"></i>
+                                <span>AES加密</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="rsa">
+                                <i class="bi bi-key-fill"></i>
+                                <span>RSA加密</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="jwt">
+                                <i class="bi bi-ticket-detailed"></i>
+                                <span>JWT工具</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="jasypt">
+                                <i class="bi bi-shield-lock-fill"></i>
+                                <span>Jasypt加密</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section" data-section="encode">
+                    <div class="nav-section-title" onclick="toggleSection(this)">
+                        <span><i class="bi bi-code-slash me-2"></i>编码转换</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                    <ul class="nav-section-items">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="base64">
+                                <i class="bi bi-image"></i>
+                                <span>Base64图片</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="url">
+                                <i class="bi bi-link-45deg"></i>
+                                <span>URL编解码</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="unicode">
+                                <i class="bi bi-fonts"></i>
+                                <span>Unicode编解码</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="html-entity">
+                                <i class="bi bi-code-square"></i>
+                                <span>HTML实体编解码</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section" data-section="generate">
+                    <div class="nav-section-title" onclick="toggleSection(this)">
+                        <span><i class="bi bi-plus-circle me-2"></i>生成工具</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                    <ul class="nav-section-items">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="qrcode">
+                                <i class="bi bi-qr-code"></i>
+                                <span>二维码</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="random">
+                                <i class="bi bi-shuffle"></i>
+                                <span>随机数生成</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="image">
+                                <i class="bi bi-image"></i>
+                                <span>图片处理</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section" data-section="dev">
+                    <div class="nav-section-title" onclick="toggleSection(this)">
+                        <span><i class="bi bi-terminal me-2"></i>开发工具</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                    <ul class="nav-section-items">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="json">
+                                <i class="bi bi-braces"></i>
+                                <span>JSON工具</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="xml">
+                                <i class="bi bi-file-code"></i>
+                                <span>XML工具</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="yaml">
+                                <i class="bi bi-file-earmark-text"></i>
+                                <span>YAML工具</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="properties">
+                                <i class="bi bi-gear-wide-connected"></i>
+                                <span>Properties转换</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="regex">
+                                <i class="bi bi-regex"></i>
+                                <span>正则表达式</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="timestamp">
+                                <i class="bi bi-clock"></i>
+                                <span>时间戳转换</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="diff">
+                                <i class="bi bi-file-diff"></i>
+                                <span>文本对比</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="cron">
+                                <i class="bi bi-calendar-event"></i>
+                                <span>Cron表达式</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="sql">
+                                <i class="bi bi-database"></i>
+                                <span>SQL格式化</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section" data-section="network">
+                    <div class="nav-section-title" onclick="toggleSection(this)">
+                        <span><i class="bi bi-diagram-3 me-2"></i>网络连接</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                    <ul class="nav-section-items">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="http">
+                                <i class="bi bi-globe"></i>
+                                <span>HTTP请求测试</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="stress-test">
+                                <i class="bi bi-speedometer2"></i>
+                                <span>HTTP接口压测</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="mqtt">
+                                <i class="bi bi-broadcast"></i>
+                                <span>MQTT连接</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-tool="tcp">
+                                <i class="bi bi-hdd-network"></i>
+                                <span>TCP连接</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="content-wrapper">
+                <div class="tool-panel active" id="panel-welcome">
+                    <div class="welcome-panel">
+                        <div class="welcome-hero">
+                            <h2><i class="bi bi-tools"></i> 开发者工具集</h2>
+                            <p class="lead">一站式开发者工具平台，提升开发效率</p>
+                            <div class="hero-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value">20+</span>
+                                    <span class="stat-label">工具数量</span>
+                                </div>
+                                <div class="stat-divider"></div>
+                                <div class="stat-item">
+                                    <span class="stat-value">免费</span>
+                                    <span class="stat-label">无需注册</span>
+                                </div>
+                                <div class="stat-divider"></div>
+                                <div class="stat-item">
+                                    <span class="stat-value">即时</span>
+                                    <span class="stat-label">无需等待</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="quick-access-section">
+                            <div class="section-header">
+                                <h4><i class="bi bi-lightning-charge"></i> 常用工具</h4>
+                                <span class="section-hint">点击快速访问</span>
+                            </div>
+                            <div class="quick-access-grid">
+                                <a th:href="@{/ai-chat}" class="quick-access-card">
+                                    <div class="card-icon"><i class="bi bi-chat-dots"></i></div>
+                                    <div class="card-content">
+                                        <h5>AI对话</h5>
+                                        <p>多模型智能对话助手</p>
+                                    </div>
+                                </a>
+                                <a th:href="@{/prompt-template}" class="quick-access-card">
+                                    <div class="card-icon"><i class="bi bi-collection"></i></div>
+                                    <div class="card-content">
+                                        <h5>Prompt模板库</h5>
+                                        <p>精选高质量提示词模板</p>
+                                    </div>
+                                </a>
+                                <a href="#" class="quick-access-card" onclick="document.querySelector('[data-tool=json]').click()">
+                                    <div class="card-icon"><i class="bi bi-braces"></i></div>
+                                    <div class="card-content">
+                                        <h5>JSON工具</h5>
+                                        <p>格式化、压缩、校验</p>
+                                    </div>
+                                </a>
+                                <a href="#" class="quick-access-card" onclick="document.querySelector('[data-tool=timestamp]').click()">
+                                    <div class="card-icon"><i class="bi bi-clock"></i></div>
+                                    <div class="card-content">
+                                        <h5>时间戳转换</h5>
+                                        <p>时间戳与日期互转</p>
+                                    </div>
+                                </a>
+                                <a href="#" class="quick-access-card" onclick="document.querySelector('[data-tool=qrcode]').click()">
+                                    <div class="card-icon"><i class="bi bi-qr-code"></i></div>
+                                    <div class="card-content">
+                                        <h5>二维码</h5>
+                                        <p>生成与解析二维码</p>
+                                    </div>
+                                </a>
+                                <a href="#" class="quick-access-card" onclick="document.querySelector('[data-tool=regex]').click()">
+                                    <div class="card-icon"><i class="bi bi-regex"></i></div>
+                                    <div class="card-content">
+                                        <h5>正则表达式</h5>
+                                        <p>测试与调试正则</p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="tool-categories-grid">
+                            <div class="category-card" onclick="document.querySelector('[data-tool=md5]').click()">
+                                <div class="category-icon"><i class="bi bi-shield-lock"></i></div>
+                                <div class="category-info">
+                                    <h6>加密工具</h6>
+                                    <p>MD5、SHA256、AES、RSA</p>
+                                </div>
+                                <i class="bi bi-arrow-right"></i>
+                            </div>
+                            <div class="category-card" onclick="document.querySelector('[data-tool=base64]').click()">
+                                <div class="category-icon"><i class="bi bi-code-slash"></i></div>
+                                <div class="category-info">
+                                    <h6>编码转换</h6>
+                                    <p>Base64、URL、Unicode</p>
+                                </div>
+                                <i class="bi bi-arrow-right"></i>
+                            </div>
+                            <div class="category-card" onclick="document.querySelector('[data-tool=json]').click()">
+                                <div class="category-icon"><i class="bi bi-braces"></i></div>
+                                <div class="category-info">
+                                    <h6>数据格式</h6>
+                                    <p>JSON、XML、YAML</p>
+                                </div>
+                                <i class="bi bi-arrow-right"></i>
+                            </div>
+                            <div class="category-card" onclick="document.querySelector('[data-tool=http]').click()">
+                                <div class="category-icon"><i class="bi bi-globe"></i></div>
+                                <div class="category-info">
+                                    <h6>网络工具</h6>
+                                    <p>HTTP、MQTT、TCP</p>
+                                </div>
+                                <i class="bi bi-arrow-right"></i>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+
+                <div class="tool-panel" id="panel-md5">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-key"></i> MD5加密工具</h3>
+                        <p class="text-muted">MD5是一种常用的哈希算法，广泛用于数据校验、密码存储等场景</p>
+                    </div>
+                    <div class="tool-body">
+                        <ul class="nav nav-tabs mb-3" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#md5-text-tab">文本加密</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#md5-file-tab">文件加密</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="md5-text-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">待加密文本</label>
+                                    <textarea class="form-control" id="md5-input" rows="3" placeholder="请输入要加密的文本" autocomplete="off"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">输出格式</label>
+                                    <div class="btn-group" role="group">
+                                        <input type="radio" class="btn-check" name="md5-case" id="md5-lowercase" value="false" checked>
+                                        <label class="btn btn-outline-primary" for="md5-lowercase">小写</label>
+                                        <input type="radio" class="btn-check" name="md5-case" id="md5-uppercase" value="true">
+                                        <label class="btn btn-outline-primary" for="md5-uppercase">大写</label>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" onclick="md5Encrypt()">
+                                    <i class="bi bi-lock"></i> 加密
+                                </button>
+                            </div>
+                            <div class="tab-pane fade" id="md5-file-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">选择文件</label>
+                                    <input type="file" class="form-control" id="md5-file-input">
+                                    <div class="form-text">支持任意类型文件，最大20MB</div>
+                                </div>
+                                <button class="btn btn-primary" onclick="md5EncryptFile()">
+                                    <i class="bi bi-lock"></i> 计算文件MD5
+                                </button>
+                            </div>
+                        </div>
+                        <div class="result-area mt-4" id="md5-result" style="display:none;">
+                            <h5><i class="bi bi-check-circle text-success"></i> 加密结果</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="result-item">
+                                        <label class="form-label">
+                                            <span class="badge bg-primary">32位</span> 标准MD5
+                                            <small class="text-muted">(推荐使用)</small>
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control font-monospace" id="md5-result-32" readonly>
+                                            <button class="btn btn-outline-secondary" onclick="copyToClipboard('md5-result-32')">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted">32位MD5是最常用的格式，安全性更高，碰撞概率更低</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="result-item">
+                                        <label class="form-label">
+                                            <span class="badge bg-secondary">16位</span> 短格式MD5
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control font-monospace" id="md5-result-16" readonly>
+                                            <button class="btn btn-outline-secondary" onclick="copyToClipboard('md5-result-16')">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted">16位是32位的中间部分，适用于对长度有限制的场景</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="md5-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-sha256">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-shield-check"></i> SHA256加密工具</h3>
+                        <p class="text-muted">SHA-256是一种安全的哈希算法，广泛用于数字签名、文件完整性校验等场景</p>
+                    </div>
+                    <div class="tool-body">
+                        <ul class="nav nav-tabs mb-3" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#sha256-text-tab">文本加密</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#sha256-file-tab">文件加密</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#sha256-verify-tab">完整性校验</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="sha256-text-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">待加密文本</label>
+                                    <textarea class="form-control" id="sha256-input" rows="3" placeholder="请输入要加密的文本" autocomplete="off"></textarea>
+                                </div>
+                                <button class="btn btn-primary" onclick="sha256Encrypt()">
+                                    <i class="bi bi-shield-check"></i> 加密
+                                </button>
+                            </div>
+                            <div class="tab-pane fade" id="sha256-file-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">选择文件</label>
+                                    <input type="file" class="form-control" id="sha256-file-input">
+                                    <div class="form-text">支持任意类型文件</div>
+                                </div>
+                                <button class="btn btn-primary" onclick="sha256EncryptFile()">
+                                    <i class="bi bi-shield-check"></i> 计算文件SHA256
+                                </button>
+                            </div>
+                            <div class="tab-pane fade" id="sha256-verify-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">原始文本</label>
+                                    <textarea class="form-control" id="sha256-verify-text" rows="2" placeholder="输入原始文本" autocomplete="off"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">预期哈希值</label>
+                                    <input type="text" class="form-control font-monospace" id="sha256-verify-hash" placeholder="输入预期的SHA256哈希值" autocomplete="off">
+                                </div>
+                                <button class="btn btn-primary" onclick="sha256Verify()">
+                                    <i class="bi bi-check-circle"></i> 校验
+                                </button>
+                            </div>
+                        </div>
+                        <div class="result-area mt-4" id="sha256-result" style="display:none;">
+                            <h5><i class="bi bi-check-circle text-success"></i> 加密结果</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="result-item">
+                                        <label class="form-label"><span class="badge bg-primary">Hex</span> 十六进制</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control font-monospace" id="sha256-result-hex" readonly>
+                                            <button class="btn btn-outline-secondary" onclick="copyToClipboard('sha256-result-hex')">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="result-item">
+                                        <label class="form-label"><span class="badge bg-secondary">Base64</span> 编码格式</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control font-monospace" id="sha256-result-base64" readonly>
+                                            <button class="btn btn-outline-secondary" onclick="copyToClipboard('sha256-result-base64')">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result-area mt-4" id="sha256-verify-result" style="display:none;">
+                            <div class="alert" id="sha256-verify-alert"></div>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="sha256-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-aes">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-lock"></i> AES加密工具</h3>
+                        <p class="text-muted">AES对称加密算法，支持多种加密模式和密钥长度</p>
+                    </div>
+                    <div class="tool-body">
+                        <ul class="nav nav-tabs mb-3" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#aes-encrypt-tab">加密</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#aes-decrypt-tab">解密</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="aes-encrypt-tab">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">待加密文本</label>
+                                            <textarea class="form-control" id="aes-encrypt-input" rows="3" placeholder="请输入要加密的文本" autocomplete="off"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">密钥 <small class="text-muted">(Base64编码)</small></label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control font-monospace" id="aes-key" placeholder="点击生成或输入密钥" autocomplete="off">
+                                                <button class="btn btn-outline-secondary" onclick="aesGenerateKey()" title="生成随机密钥">
+                                                    <i class="bi bi-key"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">IV向量 <small class="text-muted">(CBC/GCM模式需要)</small></label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control font-monospace" id="aes-iv" placeholder="可选，CBC/GCM模式自动生成" autocomplete="off">
+                                                <button class="btn btn-outline-secondary" onclick="aesGenerateIv()" title="生成随机IV">
+                                                    <i class="bi bi-shuffle"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label">密钥长度</label>
+                                        <select class="form-select" id="aes-key-size">
+                                            <option value="128">128位</option>
+                                            <option value="192">192位</option>
+                                            <option value="256">256位</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">加密模式</label>
+                                        <select class="form-select" id="aes-mode">
+                                            <option value="CBC">CBC</option>
+                                            <option value="ECB">ECB</option>
+                                            <option value="GCM">GCM</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">填充方式</label>
+                                        <select class="form-select" id="aes-padding">
+                                            <option value="PKCS5Padding">PKCS5/PKCS7</option>
+                                            <option value="NoPadding">NoPadding</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" onclick="aesEncrypt()">
+                                    <i class="bi bi-lock"></i> 加密
+                                </button>
+                            </div>
+                            <div class="tab-pane fade" id="aes-decrypt-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">加密数据 <small class="text-muted">(Base64编码)</small></label>
+                                    <textarea class="form-control font-monospace" id="aes-decrypt-input" rows="3" placeholder="请输入加密后的数据" autocomplete="off"></textarea>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">密钥</label>
+                                        <input type="text" class="form-control font-monospace" id="aes-decrypt-key" placeholder="输入加密时使用的密钥" autocomplete="off">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">IV向量</label>
+                                        <input type="text" class="form-control font-monospace" id="aes-decrypt-iv" placeholder="输入加密时生成的IV" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label">密钥长度</label>
+                                        <select class="form-select" id="aes-decrypt-key-size">
+                                            <option value="128">128位</option>
+                                            <option value="192">192位</option>
+                                            <option value="256">256位</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">加密模式</label>
+                                        <select class="form-select" id="aes-decrypt-mode">
+                                            <option value="CBC">CBC</option>
+                                            <option value="ECB">ECB</option>
+                                            <option value="GCM">GCM</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">填充方式</label>
+                                        <select class="form-select" id="aes-decrypt-padding">
+                                            <option value="PKCS5Padding">PKCS5/PKCS7</option>
+                                            <option value="NoPadding">NoPadding</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" onclick="aesDecrypt()">
+                                    <i class="bi bi-unlock"></i> 解密
+                                </button>
+                            </div>
+                        </div>
+                        <div class="result-area mt-4" id="aes-result" style="display:none;">
+                            <h5><i class="bi bi-check-circle text-success"></i> 结果</h5>
+                            <div class="mb-3">
+                                <label class="form-label" id="aes-result-label">加密结果</label>
+                                <textarea class="form-control font-monospace" id="aes-result-data" rows="3" readonly></textarea>
+                            </div>
+                            <div class="row" id="aes-result-info">
+                                <div class="col-md-4">
+                                    <label class="form-label">使用的IV</label>
+                                    <input type="text" class="form-control font-monospace" id="aes-result-iv" readonly>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">加密模式</label>
+                                    <input type="text" class="form-control" id="aes-result-mode" readonly>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">密钥长度</label>
+                                    <input type="text" class="form-control" id="aes-result-keysize" readonly>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm mt-2" onclick="copyToClipboard('aes-result-data')">
+                                <i class="bi bi-clipboard"></i> 复制结果
+                            </button>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="aes-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-base64">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-image"></i> Base64图片互转</h3>
+                        <p class="text-muted">图片与Base64编码字符串相互转换，支持多种图片格式</p>
+                    </div>
+                    <div class="tool-body">
+                        <ul class="nav nav-tabs mb-3" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#base64-encode-tab">
+                                    <i class="bi bi-arrow-right-circle"></i> 图片转Base64
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#base64-decode-tab">
+                                    <i class="bi bi-arrow-left-circle"></i> Base64转图片
+                                </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="base64-encode-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">选择图片</label>
+                                    <input type="file" class="form-control" id="base64-image-input" accept="image/*">
+                                    <div class="form-text">支持 JPG、PNG、GIF、BMP、WebP 格式，最大10MB</div>
+                                </div>
+                                <button class="btn btn-primary" onclick="imageToBase64()">
+                                    <i class="bi bi-arrow-right"></i> 转换为Base64
+                                </button>
+                                <div class="result-area mt-4" id="base64-encode-result" style="display:none;">
+                                    <h5>转换结果</h5>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="text-center mb-3">
+                                                <img id="base64-preview-img" class="img-thumbnail" style="max-width: 100%; max-height: 200px;">
+                                            </div>
+                                            <div id="base64-image-info" class="small text-muted"></div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="mb-2">
+                                                <label class="form-label">Data URL (可直接用于img src)</label>
+                                                <textarea class="form-control font-monospace" id="base64-dataurl" rows="3" readonly></textarea>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label">纯Base64编码</label>
+                                                <textarea class="form-control font-monospace" id="base64-output" rows="3" readonly></textarea>
+                                            </div>
+                                            <button class="btn btn-outline-primary btn-sm" onclick="copyToClipboard('base64-dataurl')">
+                                                <i class="bi bi-clipboard"></i> 复制Data URL
+                                            </button>
+                                            <button class="btn btn-outline-primary btn-sm" onclick="copyToClipboard('base64-output')">
+                                                <i class="bi bi-clipboard"></i> 复制Base64
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="base64-decode-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">Base64编码</label>
+                                    <textarea class="form-control font-monospace" id="base64-input" rows="4" placeholder="粘贴Base64编码或Data URL" autocomplete="off"></textarea>
+                                    <div class="form-text">支持纯Base64编码或带 data:image/xxx;base64, 前缀的格式</div>
+                                </div>
+                                <div class="btn-group">
+                                    <button class="btn btn-primary" onclick="base64ToImage()">
+                                        <i class="bi bi-arrow-right"></i> 预览图片
+                                    </button>
+                                    <button class="btn btn-success" onclick="downloadBase64Image()">
+                                        <i class="bi bi-download"></i> 下载图片
+                                    </button>
+                                </div>
+                                <div class="result-area mt-4" id="base64-decode-result" style="display:none;">
+                                    <h5>图片预览</h5>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="text-center">
+                                                <img id="base64-decoded-img" class="img-thumbnail" style="max-width: 100%;">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div id="base64-decoded-info" class="image-info-card">
+                                                <h6>图片信息</h6>
+                                                <table class="table table-sm">
+                                                    <tr><td>格式</td><td id="base64-format">-</td></tr>
+                                                    <tr><td>尺寸</td><td id="base64-dimension">-</td></tr>
+                                                    <tr><td>大小</td><td id="base64-size">-</td></tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="base64-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-url">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-link-45deg"></i> URL编解码工具</h3>
+                        <p class="text-muted">对URL进行编码和解码，处理特殊字符</p>
+                    </div>
+                    <div class="tool-body">
+                        <div class="mb-3">
+                            <label class="form-label">待处理文本</label>
+                            <textarea class="form-control" id="url-input" rows="3" placeholder="请输入要编码或解码的文本" autocomplete="off"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">字符编码</label>
+                            <select class="form-select form-select-sm" id="url-charset" style="width: auto;">
+                                <option value="UTF-8">UTF-8</option>
+                                <option value="GBK">GBK</option>
+                                <option value="GB2312">GB2312</option>
+                                <option value="ISO-8859-1">ISO-8859-1</option>
+                            </select>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="urlEncode()">
+                                <i class="bi bi-arrow-right"></i> 编码
+                            </button>
+                            <button class="btn btn-secondary" onclick="urlDecode()">
+                                <i class="bi bi-arrow-left"></i> 解码
+                            </button>
+                        </div>
+                        <div class="result-area mt-4" id="url-result" style="display:none;">
+                            <h5>处理结果</h5>
+                            <div class="mb-2">
+                                <label class="form-label">编码结果</label>
+                                <div class="input-group">
+                                    <textarea class="form-control font-monospace" id="url-encoded" rows="2" readonly></textarea>
+                                    <button class="btn btn-outline-secondary" onclick="copyToClipboard('url-encoded')">
+                                        <i class="bi bi-clipboard"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">解码结果</label>
+                                <div class="input-group">
+                                    <textarea class="form-control font-monospace" id="url-decoded" rows="2" readonly></textarea>
+                                    <button class="btn btn-outline-secondary" onclick="copyToClipboard('url-decoded')">
+                                        <i class="bi bi-clipboard"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="url-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-qrcode">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-qr-code"></i> 二维码工具</h3>
+                        <p class="text-muted">生成和解析二维码</p>
+                    </div>
+                    <div class="tool-body">
+                        <ul class="nav nav-tabs mb-3" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#qrcode-generate-tab">生成二维码</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#qrcode-parse-tab">解析二维码</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="qrcode-generate-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">二维码内容</label>
+                                    <textarea class="form-control" id="qrcode-content" rows="2" placeholder="请输入二维码内容（网址、文本等）" autocomplete="off"></textarea>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">尺寸(px)</label>
+                                        <select class="form-select" id="qrcode-size">
+                                            <option value="150">150 x 150</option>
+                                            <option value="200" selected>200 x 200</option>
+                                            <option value="300">300 x 300</option>
+                                            <option value="400">400 x 400</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">容错级别</label>
+                                        <select class="form-select" id="qrcode-level">
+                                            <option value="L">L - 7%</option>
+                                            <option value="M" selected>M - 15%</option>
+                                            <option value="Q">Q - 25%</option>
+                                            <option value="H">H - 30%</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">前景色</label>
+                                        <div class="input-group">
+                                            <input type="color" class="form-control form-control-color" id="qrcode-fg" value="#000000">
+                                            <input type="text" class="form-control" id="qrcode-fg-hex" value="#000000" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" onclick="generateQrCode()">
+                                    <i class="bi bi-qr-code"></i> 生成二维码
+                                </button>
+                                <div class="result-area mt-4" id="qrcode-result" style="display:none;">
+                                    <h5>生成结果</h5>
+                                    <div class="text-center">
+                                        <img id="qrcode-img" class="img-thumbnail" style="max-width: 300px;">
+                                    </div>
+                                    <div class="text-center mt-3">
+                                        <button class="btn btn-outline-primary" onclick="downloadQrCode()">
+                                            <i class="bi bi-download"></i> 下载二维码
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="qrcode-parse-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">选择二维码图片</label>
+                                    <input type="file" class="form-control" id="qrcode-file-input" accept="image/*">
+                                </div>
+                                <button class="btn btn-primary" onclick="parseQrCode()">
+                                    <i class="bi bi-search"></i> 解析二维码
+                                </button>
+                                <div class="result-area mt-4" id="qrcode-parse-result" style="display:none;">
+                                    <h5>解析结果</h5>
+                                    <textarea class="form-control" id="qrcode-parsed-content" rows="3" readonly></textarea>
+                                    <button class="btn btn-outline-primary btn-sm mt-2" onclick="copyToClipboard('qrcode-parsed-content')">
+                                        <i class="bi bi-clipboard"></i> 复制内容
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="qrcode-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-timestamp">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-clock"></i> 时间戳转换工具</h3>
+                        <p class="text-muted">时间戳与日期时间相互转换</p>
+                    </div>
+                    <div class="tool-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header">
+                                        <i class="bi bi-arrow-right-circle"></i> 时间戳转日期
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">时间戳</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="timestamp-input" placeholder="输入时间戳(秒或毫秒)" autocomplete="off">
+                                                <button class="btn btn-outline-secondary" onclick="getCurrentTimestamp()" title="获取当前时间戳">
+                                                    <i class="bi bi-clock"></i> 当前
+                                                </button>
+                                            </div>
+                                            <div class="form-text">支持秒级(10位)或毫秒级(13位)时间戳</div>
+                                        </div>
+                                        <button class="btn btn-primary w-100" onclick="timestampToDatetime()">
+                                            <i class="bi bi-arrow-right"></i> 转换为日期时间
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header">
+                                        <i class="bi bi-arrow-left-circle"></i> 日期转时间戳
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">日期时间</label>
+                                            <input type="datetime-local" class="form-control" id="datetime-picker" step="1">
+                                            <div class="form-text">选择日期时间后可直接修改输入框内容</div>
+                                        </div>
+                                        <button class="btn btn-primary w-100" onclick="datetimeToTimestamp()">
+                                            <i class="bi bi-arrow-left"></i> 转换为时间戳
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result-area" id="timestamp-result" style="display:none;">
+                            <h5><i class="bi bi-check-circle text-success"></i> 转换结果</h5>
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <div class="result-box">
+                                        <div class="result-value" id="result-timestamp-ms">-</div>
+                                        <div class="result-label">毫秒时间戳</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="result-box">
+                                        <div class="result-value" id="result-timestamp-sec">-</div>
+                                        <div class="result-label">秒时间戳</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="result-box">
+                                        <div class="result-value" id="result-datetime">-</div>
+                                        <div class="result-label">日期时间</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="result-box">
+                                        <div class="result-value" id="result-weekday">-</div>
+                                        <div class="result-label">星期</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <label class="form-label">ISO 8601 格式</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control font-monospace" id="result-iso" readonly>
+                                    <button class="btn btn-outline-secondary" onclick="copyToClipboard('result-iso')">
+                                        <i class="bi bi-clipboard"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="timestamp-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-random">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-shuffle"></i> 随机数生成工具</h3>
+                        <p class="text-muted">生成随机字符串、数字和UUID</p>
+                    </div>
+                    <div class="tool-body">
+                        <ul class="nav nav-tabs mb-3" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#random-string-tab">随机字符串</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#random-uuid-tab">UUID生成</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="random-string-tab">
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">长度</label>
+                                        <input type="number" class="form-control" id="random-length" value="16" min="1" max="128">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">类型</label>
+                                        <select class="form-select" id="random-type">
+                                            <option value="MIXED">混合</option>
+                                            <option value="NUMBER">纯数字</option>
+                                            <option value="LETTER">纯字母</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">生成数量</label>
+                                        <input type="number" class="form-control" id="random-count" value="1" min="1" max="100">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">包含字符</label>
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="random-uppercase" checked>
+                                            <label class="form-check-label" for="random-uppercase">大写字母 (A-Z)</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="random-lowercase" checked>
+                                            <label class="form-check-label" for="random-lowercase">小写字母 (a-z)</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="random-number" checked>
+                                            <label class="form-check-label" for="random-number">数字 (0-9)</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="random-special">
+                                            <label class="form-check-label" for="random-special">特殊字符 (!@#$%...)</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">排除字符</label>
+                                    <input type="text" class="form-control" id="random-exclude" placeholder="输入要排除的字符，如：0Oo1lI" autocomplete="off">
+                                </div>
+                                <button class="btn btn-primary" onclick="generateRandom()">
+                                    <i class="bi bi-shuffle"></i> 生成
+                                </button>
+                            </div>
+                            <div class="tab-pane fade" id="random-uuid-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">UUID版本</label>
+                                    <select class="form-select" id="uuid-version">
+                                        <option value="4">UUID v4 (随机)</option>
+                                        <option value="1">UUID v1 (时间戳)</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">生成数量</label>
+                                    <input type="number" class="form-control" id="uuid-count" value="1" min="1" max="100">
+                                </div>
+                                <button class="btn btn-primary" onclick="generateUuid()">
+                                    <i class="bi bi-fingerprint"></i> 生成UUID
+                                </button>
+                            </div>
+                        </div>
+                        <div class="result-area mt-4" id="random-result" style="display:none;">
+                            <h5>生成结果</h5>
+                            <div id="random-values" class="random-values-list"></div>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="random-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-json">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-braces"></i> JSON工具</h3>
+                        <p class="text-muted">JSON格式化、压缩和校验</p>
+                    </div>
+                    <div class="tool-body">
+                        <div class="mb-3">
+                            <label class="form-label">JSON内容</label>
+                            <textarea class="form-control font-monospace" id="json-input" rows="8" placeholder="请输入JSON内容" autocomplete="off"></textarea>
+                        </div>
+                        <div class="btn-group mb-3">
+                            <button class="btn btn-primary" onclick="jsonFormat()">
+                                <i class="bi bi-indent"></i> 格式化
+                            </button>
+                            <button class="btn btn-secondary" onclick="jsonCompress()">
+                                <i class="bi bi-compress"></i> 压缩
+                            </button>
+                            <button class="btn btn-info" onclick="jsonValidate()">
+                                <i class="bi bi-check-circle"></i> 校验
+                            </button>
+                        </div>
+                        <div class="result-area" id="json-result" style="display:none;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0">处理结果</h5>
+                                <span id="json-stats" class="badge bg-info"></span>
+                            </div>
+                            <textarea class="form-control font-monospace" id="json-output" rows="8" readonly></textarea>
+                            <button class="btn btn-outline-primary btn-sm mt-2" onclick="copyToClipboard('json-output')">
+                                <i class="bi bi-clipboard"></i> 复制结果
+                            </button>
+                        </div>
+                        <div class="alert alert-danger mt-3" id="json-error" style="display:none;"></div>
+                    </div>
+                    <div class="tool-history" id="json-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-regex">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-regex"></i> 正则表达式工具</h3>
+                        <p class="text-muted">正则表达式测试和常用模板</p>
+                    </div>
+                    <div class="tool-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label class="form-label">正则表达式</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">/</span>
+                                        <input type="text" class="form-control font-monospace" id="regex-pattern" placeholder="输入正则表达式" autocomplete="off">
+                                        <span class="input-group-text">/</span>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">待匹配文本</label>
+                                    <textarea class="form-control font-monospace" id="regex-text" rows="5" placeholder="输入待匹配文本" autocomplete="off"></textarea>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">匹配模式</label>
+                                        <select class="form-select" id="regex-mode">
+                                            <option value="FIND">查找全部</option>
+                                            <option value="MATCHES">完全匹配</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <label class="form-label">选项</label>
+                                        <div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" id="regex-ignore-case">
+                                                <label class="form-check-label" for="regex-ignore-case">忽略大小写 (i)</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" id="regex-multiline">
+                                                <label class="form-check-label" for="regex-multiline">多行模式 (m)</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" onclick="testRegex()">
+                                    <i class="bi bi-play-fill"></i> 测试匹配
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <h5>常用模板</h5>
+                                <div class="accordion" id="regex-templates"></div>
+                            </div>
+                        </div>
+                        <div class="result-area mt-4" id="regex-result" style="display:none;">
+                            <h5>匹配结果</h5>
+                            <div id="regex-matches"></div>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="regex-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-mqtt">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-broadcast"></i> MQTT连接工具</h3>
+                        <p class="text-muted">MQTT协议连接、发布和订阅（支持多连接）</p>
+                    </div>
+                    <div class="tool-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <span>连接配置</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-2">
+                                            <label class="form-label">服务器地址</label>
+                                            <input type="text" class="form-control form-control-sm" id="mqtt-broker" placeholder="broker.example.com" autocomplete="off">
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-6">
+                                                <label class="form-label">端口</label>
+                                                <input type="number" class="form-control form-control-sm" id="mqtt-port" value="1883">
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label">版本</label>
+                                                <select class="form-select form-select-sm" id="mqtt-version">
+                                                    <option value="3.1.1">MQTT 3.1.1</option>
+                                                    <option value="3.1">MQTT 3.1</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-6">
+                                                <label class="form-label">用户名</label>
+                                                <input type="text" class="form-control form-control-sm" id="mqtt-username" autocomplete="off">
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label">密码</label>
+                                                <input type="password" class="form-control form-control-sm" id="mqtt-password">
+                                            </div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label">Client ID (留空自动生成)</label>
+                                            <input type="text" class="form-control form-control-sm" id="mqtt-client-id" autocomplete="off">
+                                        </div>
+                                        <button class="btn btn-success btn-sm w-100" onclick="mqttConnect()">
+                                            <i class="bi bi-plug"></i> 新建连接
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card mb-3">
+                                    <div class="card-header">我的连接</div>
+                                    <div class="card-body">
+                                        <div id="mqtt-connection-list" class="connection-list-container">
+                                            <div class="text-muted small">暂无连接</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-header">主题订阅</div>
+                                    <div class="card-body">
+                                        <div class="mb-2">
+                                            <label class="form-label">订阅主题</label>
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" class="form-control" id="mqtt-subscribe-topic" placeholder="topic/test" autocomplete="off">
+                                                <select class="form-select" id="mqtt-subscribe-qos" style="max-width: 100px;">
+                                                    <option value="0">QoS 0</option>
+                                                    <option value="1">QoS 1</option>
+                                                    <option value="2">QoS 2</option>
+                                                </select>
+                                                <button class="btn btn-success" onclick="mqttSubscribe()">
+                                                    <i class="bi bi-plus-circle"></i> 订阅
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label">已订阅主题</label>
+                                            <div class="mqtt-subscribed-list" id="mqtt-subscribed-topics">
+                                                <small class="text-muted">暂无订阅</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card mt-3">
+                                    <div class="card-header">消息发布</div>
+                                    <div class="card-body">
+                                        <div class="mb-2">
+                                            <label class="form-label">主题</label>
+                                            <input type="text" class="form-control form-control-sm" id="mqtt-topic" autocomplete="off">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label">消息内容</label>
+                                            <textarea class="form-control form-control-sm" id="mqtt-message" rows="3" autocomplete="off"></textarea>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-6">
+                                                <label class="form-label">QoS</label>
+                                                <select class="form-select form-select-sm" id="mqtt-qos">
+                                                    <option value="0">0 - 最多一次</option>
+                                                    <option value="1">1 - 至少一次</option>
+                                                    <option value="2">2 - 恰好一次</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label">保留</label>
+                                                <div class="form-check mt-2">
+                                                    <input class="form-check-input" type="checkbox" id="mqtt-retained">
+                                                    <label class="form-check-label" for="mqtt-retained">保留消息</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-primary btn-sm w-100" onclick="mqttPublish()">
+                                            <i class="bi bi-send"></i> 发布
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <span>消息日志</span>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="clearMqttLogs()">清空</button>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="mqtt-log-container" id="mqtt-logs"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="mqtt-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-tcp">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-hdd-network"></i> TCP连接工具</h3>
+                        <p class="text-muted">TCP Socket连接和数据收发</p>
+                    </div>
+                    <div class="tool-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header">连接配置</div>
+                                    <div class="card-body">
+                                        <div class="row mb-2">
+                                            <div class="col-8">
+                                                <label class="form-label">服务器地址</label>
+                                                <input type="text" class="form-control form-control-sm" id="tcp-host" placeholder="127.0.0.1" autocomplete="off">
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="form-label">端口</label>
+                                                <input type="number" class="form-control form-control-sm" id="tcp-port" placeholder="8080">
+                                            </div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-6">
+                                                <label class="form-label">超时(毫秒)</label>
+                                                <input type="number" class="form-control form-control-sm" id="tcp-timeout" value="5000">
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label">字符编码</label>
+                                                <select class="form-select form-select-sm" id="tcp-charset">
+                                                    <option value="UTF-8">UTF-8</option>
+                                                    <option value="GBK">GBK</option>
+                                                    <option value="ISO-8859-1">ISO-8859-1</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-success btn-sm w-100" onclick="tcpConnect()">
+                                            <i class="bi bi-plug"></i> 新建连接
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card mb-3">
+                                    <div class="card-header">我的连接</div>
+                                    <div class="card-body">
+                                        <div id="tcp-connection-list" class="connection-list-container">
+                                            <div class="text-muted small">暂无连接</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-header">发送数据</div>
+                                    <div class="card-body">
+                                        <div class="row mb-2">
+                                            <div class="col-6">
+                                                <label class="form-label">数据格式</label>
+                                                <select class="form-select form-select-sm" id="tcp-format">
+                                                    <option value="TEXT">文本 (TEXT)</option>
+                                                    <option value="HEX">十六进制 (HEX)</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label">选项</label>
+                                                <div class="form-check mt-2">
+                                                    <input class="form-check-input" type="checkbox" id="tcp-add-newline" checked>
+                                                    <label class="form-check-label" for="tcp-add-newline">添加换行符</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <textarea class="form-control form-control-sm font-monospace" id="tcp-send-data" rows="3" placeholder="输入要发送的数据" autocomplete="off"></textarea>
+                                            <small class="text-muted" id="tcp-format-hint">文本模式：直接发送输入内容</small>
+                                        </div>
+                                        <button class="btn btn-primary btn-sm w-100" onclick="tcpSend()">
+                                            <i class="bi bi-send"></i> 发送
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <span>数据日志</span>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="clearTcpLogs()">清空</button>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="tcp-log-container" id="tcp-logs"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="tcp-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-rsa">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-key-fill"></i> RSA加密工具</h3>
+                        <p class="text-muted">RSA非对称加密，支持密钥对生成、加密解密、签名验签</p>
+                    </div>
+                    <div class="tool-body">
+                        <ul class="nav nav-tabs mb-3" role="tablist">
+                            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#rsa-keypair-tab">密钥对</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#rsa-encrypt-tab">加密解密</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#rsa-sign-tab">签名验签</button></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="rsa-keypair-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">密钥长度</label>
+                                    <select class="form-select" id="rsa-keysize">
+                                        <option value="1024">1024位</option>
+                                        <option value="2048" selected>2048位</option>
+                                        <option value="4096">4096位</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary" onclick="rsaGenerateKeyPair()"><i class="bi bi-key"></i> 生成密钥对</button>
+                                <div class="mt-3">
+                                    <label class="form-label">公钥</label>
+                                    <textarea class="form-control font-monospace" id="rsa-public-key" rows="4" readonly></textarea>
+                                </div>
+                                <div class="mt-2">
+                                    <label class="form-label">私钥</label>
+                                    <textarea class="form-control font-monospace" id="rsa-private-key" rows="4" readonly></textarea>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="rsa-encrypt-tab">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">待加密文本</label>
+                                            <textarea class="form-control" id="rsa-encrypt-input" rows="3" autocomplete="off"></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">填充方式</label>
+                                            <select class="form-select" id="rsa-padding">
+                                                <option value="PKCS1">PKCS1</option>
+                                            </select>
+                                        </div>
+                                        <button class="btn btn-primary" onclick="rsaEncrypt()"><i class="bi bi-lock"></i> 公钥加密</button>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">加密数据</label>
+                                            <textarea class="form-control font-monospace" id="rsa-decrypt-input" rows="3" autocomplete="off"></textarea>
+                                        </div>
+                                        <button class="btn btn-primary" onclick="rsaDecrypt()"><i class="bi bi-unlock"></i> 私钥解密</button>
+                                    </div>
+                                </div>
+                                <div class="result-area mt-3" id="rsa-result-container" style="display:none;">
+                                    <label class="form-label">结果</label>
+                                    <textarea class="form-control font-monospace" id="rsa-result" rows="3" readonly></textarea>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="rsa-sign-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">待签名文本</label>
+                                    <textarea class="form-control" id="rsa-sign-input" rows="2" autocomplete="off"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">签名算法</label>
+                                    <select class="form-select" id="rsa-sign-algorithm">
+                                        <option value="SHA256withRSA">SHA256withRSA</option>
+                                        <option value="SHA1withRSA">SHA1withRSA</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary" onclick="rsaSign()"><i class="bi bi-pen"></i> 签名</button>
+                                <div class="result-area mt-3" id="rsa-signature-container" style="display:none;">
+                                    <label class="form-label">签名结果</label>
+                                    <textarea class="form-control font-monospace" id="rsa-signature-result" rows="2" readonly></textarea>
+                                </div>
+                                <hr>
+                                <div class="mb-3">
+                                    <label class="form-label">验签文本</label>
+                                    <textarea class="form-control" id="rsa-verify-input" rows="2" autocomplete="off"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">签名</label>
+                                    <textarea class="form-control font-monospace" id="rsa-verify-signature" rows="2" autocomplete="off"></textarea>
+                                </div>
+                                <button class="btn btn-primary" onclick="rsaVerify()"><i class="bi bi-check-circle"></i> 验签</button>
+                                <div class="result-area mt-3" id="rsa-verify-result" style="display:none;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="rsa-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-jwt">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-ticket-detailed"></i> JWT工具</h3>
+                        <p class="text-muted">JWT Token生成、解析和验证</p>
+                    </div>
+                    <div class="tool-body">
+                        <ul class="nav nav-tabs mb-3" role="tablist">
+                            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#jwt-generate-tab">生成Token</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#jwt-decode-tab">解析验证</button></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="jwt-generate-tab">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">密钥 (至少32字符)</label>
+                                            <input type="text" class="form-control font-monospace" id="jwt-secret" placeholder="输入密钥" autocomplete="off">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Subject</label>
+                                            <input type="text" class="form-control" id="jwt-subject" placeholder="主题" autocomplete="off">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Issuer</label>
+                                            <input type="text" class="form-control" id="jwt-issuer" placeholder="签发者" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Audience</label>
+                                            <input type="text" class="form-control" id="jwt-audience" placeholder="受众" autocomplete="off">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">过期时间(秒)</label>
+                                            <input type="number" class="form-control" id="jwt-expiration" placeholder="如3600表示1小时">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">算法</label>
+                                            <select class="form-select" id="jwt-algorithm">
+                                                <option value="HS256">HS256</option>
+                                                <option value="HS384">HS384</option>
+                                                <option value="HS512">HS512</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">自定义Claims (JSON)</label>
+                                    <textarea class="form-control font-monospace" id="jwt-claims" rows="2" placeholder='{"key": "value"}' autocomplete="off"></textarea>
+                                </div>
+                                <button class="btn btn-primary" onclick="jwtGenerate()"><i class="bi bi-plus-circle"></i> 生成Token</button>
+                                <div class="mt-3">
+                                    <label class="form-label">生成的Token</label>
+                                    <textarea class="form-control font-monospace" id="jwt-token" rows="3" readonly></textarea>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="jwt-decode-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">Token</label>
+                                    <textarea class="form-control font-monospace" id="jwt-token-decode" rows="3" placeholder="粘贴JWT Token" autocomplete="off"></textarea>
+                                </div>
+                                <div class="btn-group mb-3">
+                                    <button class="btn btn-primary" onclick="jwtDecode()"><i class="bi bi-search"></i> 解码</button>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">验证密钥</label>
+                                    <input type="text" class="form-control font-monospace" id="jwt-secret-verify" placeholder="输入密钥验证签名" autocomplete="off">
+                                </div>
+                                <button class="btn btn-success" onclick="jwtVerify()"><i class="bi bi-check-circle"></i> 验证</button>
+                                <div class="result-area mt-3" id="jwt-decode-result" style="display:none;">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Header</label>
+                                            <textarea class="form-control font-monospace" id="jwt-header" rows="4" readonly></textarea>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Payload</label>
+                                            <textarea class="form-control font-monospace" id="jwt-payload" rows="4" readonly></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <label class="form-label">Signature</label>
+                                        <input type="text" class="form-control font-monospace" id="jwt-signature" readonly>
+                                    </div>
+                                </div>
+                                <div class="result-area mt-3" id="jwt-verify-result" style="display:none;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="jwt-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-jasypt">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-shield-lock-fill"></i> Jasypt加密工具</h3>
+                        <p class="text-muted">基于密码的加密工具，常用于Spring Boot配置文件加密</p>
+                    </div>
+                    <div class="tool-body">
+                        <ul class="nav nav-tabs mb-3" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#jasypt-encrypt-tab">加密</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#jasypt-decrypt-tab">解密</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="jasypt-encrypt-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">待加密文本</label>
+                                    <textarea class="form-control" id="jasypt-encrypt-input" rows="3" placeholder="请输入要加密的文本" autocomplete="off"></textarea>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">加密密码</label>
+                                        <input type="text" class="form-control font-monospace" id="jasypt-password" placeholder="输入加密密码" autocomplete="off">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">加密算法</label>
+                                        <select class="form-select" id="jasypt-algorithm">
+                                            <option value="PBEWithMD5AndDES">PBEWithMD5AndDES</option>
+                                            <option value="PBEWithMD5AndTripleDES">PBEWithMD5AndTripleDES</option>
+                                            <option value="PBEWithSHA1AndDESede">PBEWithSHA1AndDESede</option>
+                                            <option value="PBEWithSHA1AndRC2_40">PBEWithSHA1AndRC2_40</option>
+                                            <option value="PBEWITHHMACSHA512ANDAES_256">PBEWITHHMACSHA512ANDAES_256</option>
+                                            <option value="PBEWITHHMACSHA256ANDAES_128">PBEWITHHMACSHA256ANDAES_128</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">迭代次数</label>
+                                        <input type="number" class="form-control" id="jasypt-iterations" value="1000" min="1" placeholder="默认1000">
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" onclick="jasyptEncrypt()">
+                                    <i class="bi bi-lock"></i> 加密
+                                </button>
+                                <div class="result-area mt-3" id="jasypt-encrypt-result" style="display:none;">
+                                    <div class="mb-2">
+                                        <label class="form-label">加密结果</label>
+                                        <textarea class="form-control font-monospace" id="jasypt-result-data" rows="2" readonly></textarea>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label">带前缀格式 <small class="text-muted">(可直接用于配置文件)</small></label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control font-monospace" id="jasypt-result-with-prefix" readonly>
+                                            <button class="btn btn-outline-secondary" onclick="copyToClipboard(document.getElementById('jasypt-result-with-prefix').value)" title="复制">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="jasypt-decrypt-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">加密文本 <small class="text-muted">(支持ENC()格式)</small></label>
+                                    <textarea class="form-control font-monospace" id="jasypt-decrypt-input" rows="3" placeholder="请输入加密后的文本，支持ENC(xxx)格式" autocomplete="off"></textarea>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">加密密码</label>
+                                        <input type="text" class="form-control font-monospace" id="jasypt-decrypt-password" placeholder="输入加密时使用的密码" autocomplete="off">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">加密算法</label>
+                                        <select class="form-select" id="jasypt-decrypt-algorithm">
+                                            <option value="PBEWithMD5AndDES">PBEWithMD5AndDES</option>
+                                            <option value="PBEWithMD5AndTripleDES">PBEWithMD5AndTripleDES</option>
+                                            <option value="PBEWithSHA1AndDESede">PBEWithSHA1AndDESede</option>
+                                            <option value="PBEWithSHA1AndRC2_40">PBEWithSHA1AndRC2_40</option>
+                                            <option value="PBEWITHHMACSHA512ANDAES_256">PBEWITHHMACSHA512ANDAES_256</option>
+                                            <option value="PBEWITHHMACSHA256ANDAES_128">PBEWITHHMACSHA256ANDAES_128</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">迭代次数</label>
+                                        <input type="number" class="form-control" id="jasypt-decrypt-iterations" value="1000" min="1" placeholder="默认1000">
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" onclick="jasyptDecrypt()">
+                                    <i class="bi bi-unlock"></i> 解密
+                                </button>
+                                <div class="result-area mt-3" id="jasypt-decrypt-result" style="display:none;">
+                                    <label class="form-label">解密结果</label>
+                                    <textarea class="form-control font-monospace" id="jasypt-decrypted-text" rows="3" readonly></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="jasypt-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-unicode">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-fonts"></i> Unicode编解码</h3>
+                        <p class="text-muted">文本与Unicode编码相互转换</p>
+                    </div>
+                    <div class="tool-body">
+                        <div class="mb-3">
+                            <label class="form-label">输入文本</label>
+                            <textarea class="form-control" id="unicode-input" rows="4" placeholder="输入文本或Unicode编码" autocomplete="off"></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">编码格式</label>
+                                <select class="form-select" id="unicode-format">
+                                    <option value="\\u">\uXXXX</option>
+                                    <option value="%u">%uXXXX</option>
+                                    <option value="U+">U+XXXX</option>
+                                    <option value="&#x">&#xXXXX;</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" id="unicode-chinese-only">
+                                    <label class="form-check-label" for="unicode-chinese-only">仅编码中文</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="unicodeEncode()"><i class="bi bi-arrow-right"></i> 编码</button>
+                            <button class="btn btn-secondary" onclick="unicodeDecode()"><i class="bi bi-arrow-left"></i> 解码</button>
+                        </div>
+                        <div class="result-area mt-3" id="unicode-result-container" style="display:none;">
+                            <label class="form-label">结果</label>
+                            <textarea class="form-control font-monospace" id="unicode-result" rows="4" readonly></textarea>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="unicode-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-html-entity">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-code-square"></i> HTML实体编解码</h3>
+                        <p class="text-muted">HTML特殊字符转义与反转义</p>
+                    </div>
+                    <div class="tool-body">
+                        <div class="mb-3">
+                            <label class="form-label">输入文本</label>
+                            <textarea class="form-control" id="html-entity-input" rows="4" placeholder="输入文本或HTML实体" autocomplete="off"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">编码模式</label>
+                            <select class="form-select" id="html-entity-mode">
+                                <option value="named">命名实体</option>
+                                <option value="decimal">十进制</option>
+                                <option value="hex">十六进制</option>
+                            </select>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="htmlEntityEncode()"><i class="bi bi-arrow-right"></i> 编码</button>
+                            <button class="btn btn-secondary" onclick="htmlEntityDecode()"><i class="bi bi-arrow-left"></i> 解码</button>
+                        </div>
+                        <div class="result-area mt-3" id="html-entity-result-container" style="display:none;">
+                            <label class="form-label">结果</label>
+                            <textarea class="form-control font-monospace" id="html-entity-result" rows="4" readonly></textarea>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="html-entity-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-diff">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-file-diff"></i> 文本差异对比</h3>
+                        <p class="text-muted">对比两段文本的差异</p>
+                    </div>
+                    <div class="tool-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">原始文本</label>
+                                <textarea class="form-control font-monospace" id="diff-text1" rows="8" placeholder="输入原始文本" autocomplete="off"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">修改后文本</label>
+                                <textarea class="form-control font-monospace" id="diff-text2" rows="8" placeholder="输入修改后文本" autocomplete="off"></textarea>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-4">
+                                <label class="form-label">对比模式</label>
+                                <select class="form-select" id="diff-mode">
+                                    <option value="line">按行对比</option>
+                                    <option value="word">按词对比</option>
+                                    <option value="char">按字符对比</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary mt-3" onclick="diffCompare()"><i class="bi bi-file-diff"></i> 对比</button>
+                        <div class="result-area mt-3" id="diff-result-container" style="display:none;">
+                            <label class="form-label">对比结果</label>
+                            <div id="diff-result" class="diff-container"></div>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="diff-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-xml">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-file-code"></i> XML工具</h3>
+                        <p class="text-muted">XML格式化、压缩、校验和转换</p>
+                    </div>
+                    <div class="tool-body">
+                        <div class="mb-3">
+                            <label class="form-label">XML内容</label>
+                            <textarea class="form-control font-monospace" id="xml-input" rows="8" placeholder="输入XML内容" autocomplete="off"></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">缩进空格</label>
+                                <input type="number" class="form-control" id="xml-indent" value="2">
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="xmlFormat()"><i class="bi bi-indent"></i> 格式化</button>
+                            <button class="btn btn-secondary" onclick="xmlCompress()"><i class="bi bi-compress"></i> 压缩</button>
+                            <button class="btn btn-info" onclick="xmlValidate()"><i class="bi bi-check-circle"></i> 校验</button>
+                            <button class="btn btn-warning" onclick="xmlToJson()"><i class="bi bi-arrow-left-right"></i> 转JSON</button>
+                        </div>
+                        <div class="result-area mt-3" id="xml-result-container" style="display:none;">
+                            <label class="form-label">结果</label>
+                            <textarea class="form-control font-monospace" id="xml-result" rows="8" readonly></textarea>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="xml-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-yaml">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-file-earmark-text"></i> YAML工具</h3>
+                        <p class="text-muted">YAML格式化、校验和与JSON互转</p>
+                    </div>
+                    <div class="tool-body">
+                        <div class="mb-3">
+                            <label class="form-label">YAML/JSON内容</label>
+                            <textarea class="form-control font-monospace" id="yaml-input" rows="8" placeholder="输入YAML或JSON内容" autocomplete="off"></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">缩进空格</label>
+                                <input type="number" class="form-control" id="yaml-indent" value="2">
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="yamlFormat()"><i class="bi bi-indent"></i> 格式化</button>
+                            <button class="btn btn-info" onclick="yamlValidate()"><i class="bi bi-check-circle"></i> 校验</button>
+                            <button class="btn btn-warning" onclick="yamlToJson()"><i class="bi bi-arrow-right"></i> 转JSON</button>
+                            <button class="btn btn-success" onclick="jsonToYaml()"><i class="bi bi-arrow-left"></i> JSON转YAML</button>
+                        </div>
+                        <div class="result-area mt-3" id="yaml-result-container" style="display:none;">
+                            <label class="form-label">结果</label>
+                            <textarea class="form-control font-monospace" id="yaml-result" rows="8" readonly></textarea>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="yaml-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-cron">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-calendar-event"></i> Cron表达式生成器</h3>
+                        <p class="text-muted">生成和解析Cron表达式，预览下次执行时间</p>
+                    </div>
+                    <div class="tool-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">秒</label>
+                                        <input type="text" class="form-control" id="cron-second" value="0" placeholder="0-59">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">分</label>
+                                        <input type="text" class="form-control" id="cron-minute" value="*" placeholder="0-59">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">时</label>
+                                        <input type="text" class="form-control" id="cron-hour" value="*" placeholder="0-23">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">日</label>
+                                        <input type="text" class="form-control" id="cron-day-of-month" value="*" placeholder="1-31">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">月</label>
+                                        <input type="text" class="form-control" id="cron-month" value="*" placeholder="1-12">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">周</label>
+                                        <input type="text" class="form-control" id="cron-day-of-week" value="*" placeholder="0-6">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">常用预设</label>
+                                <div id="cron-presets" class="d-grid gap-1"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Cron表达式</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control font-monospace" id="cron-expression" placeholder="0 * * * * ?" autocomplete="off">
+                                <button class="btn btn-primary" onclick="cronParse()"><i class="bi bi-search"></i> 解析</button>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="cronGenerate()"><i class="bi bi-gear"></i> 生成表达式</button>
+                        <div class="result-area mt-3" id="cron-result-container" style="display:none;">
+                            <div class="alert alert-info" id="cron-description"></div>
+                            <label class="form-label">下次执行时间</label>
+                            <ul class="list-group" id="cron-next-executions"></ul>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="cron-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-sql">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-database"></i> SQL格式化工具</h3>
+                        <p class="text-muted">SQL语句格式化、压缩和校验</p>
+                    </div>
+                    <div class="tool-body">
+                        <div class="mb-3">
+                            <label class="form-label">SQL语句</label>
+                            <textarea class="form-control font-monospace" id="sql-input" rows="8" placeholder="输入SQL语句" autocomplete="off"></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">缩进空格</label>
+                                <input type="number" class="form-control" id="sql-indent" value="2">
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="sqlFormat()"><i class="bi bi-indent"></i> 格式化</button>
+                            <button class="btn btn-secondary" onclick="sqlCompress()"><i class="bi bi-compress"></i> 压缩</button>
+                            <button class="btn btn-info" onclick="sqlValidate()"><i class="bi bi-check-circle"></i> 校验</button>
+                        </div>
+                        <div class="result-area mt-3" id="sql-result-container" style="display:none;">
+                            <label class="form-label">结果</label>
+                            <textarea class="form-control font-monospace" id="sql-result" rows="8" readonly></textarea>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="sql-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-http">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-globe"></i> HTTP请求测试</h3>
+                        <p class="text-muted">发送HTTP请求测试API接口</p>
+                    </div>
+                    <div class="tool-body">
+                        <div class="row mb-3">
+                            <div class="col-md-2">
+                                <label class="form-label">方法</label>
+                                <select class="form-select" id="http-method">
+                                    <option value="GET">GET</option>
+                                    <option value="POST">POST</option>
+                                    <option value="PUT">PUT</option>
+                                    <option value="DELETE">DELETE</option>
+                                    <option value="PATCH">PATCH</option>
+                                </select>
+                            </div>
+                            <div class="col-md-10">
+                                <label class="form-label">URL</label>
+                                <input type="text" class="form-control font-monospace" id="http-url" placeholder="https://api.example.com/endpoint" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label mb-0">请求头</label>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <input type="radio" class="btn-check" name="http-headers-mode" id="http-headers-json" value="json" checked>
+                                    <label class="btn btn-outline-primary" for="http-headers-json">JSON</label>
+                                    <input type="radio" class="btn-check" name="http-headers-mode" id="http-headers-kv" value="kv">
+                                    <label class="btn btn-outline-primary" for="http-headers-kv">键值对</label>
+                                </div>
+                            </div>
+                            <textarea class="form-control font-monospace" id="http-headers" rows="3" placeholder='{"Content-Type": "application/json"}' autocomplete="off"></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Content-Type</label>
+                                <select class="form-select" id="http-content-type">
+                                    <option value="application/json">application/json</option>
+                                    <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+                                    <option value="text/plain">text/plain</option>
+                                    <option value="text/html">text/html</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label mb-0">请求体</label>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <input type="radio" class="btn-check" name="http-body-mode" id="http-body-json" value="json" checked>
+                                    <label class="btn btn-outline-primary" for="http-body-json">JSON</label>
+                                    <input type="radio" class="btn-check" name="http-body-mode" id="http-body-form" value="form">
+                                    <label class="btn btn-outline-primary" for="http-body-form">表单</label>
+                                    <input type="radio" class="btn-check" name="http-body-mode" id="http-body-raw" value="raw">
+                                    <label class="btn btn-outline-primary" for="http-body-raw">原始</label>
+                                </div>
+                            </div>
+                            <textarea class="form-control font-monospace" id="http-body" rows="4" placeholder='{"key": "value"}' autocomplete="off"></textarea>
+                        </div>
+                        <button class="btn btn-primary" onclick="httpSendRequest()"><i class="bi bi-send"></i> 发送请求</button>
+                        <div class="result-area mt-3" id="http-result-container" style="display:none;">
+                            <div class="row mb-2">
+                                <div class="col-md-4"><strong>状态码:</strong> <span id="http-status"></span></div>
+                                <div class="col-md-4"><strong>耗时:</strong> <span id="http-time"></span></div>
+                                <div class="col-md-4"><strong>大小:</strong> <span id="http-size"></span></div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">响应头</label>
+                                <textarea class="form-control font-monospace" id="http-response-headers" rows="3" readonly></textarea>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">响应体</label>
+                                <textarea class="form-control font-monospace" id="http-response-body" rows="8" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="http-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-properties">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-gear-wide-connected"></i> Properties转换工具</h3>
+                        <p class="text-muted">Properties与YAML/JSON格式互转</p>
+                    </div>
+                    <div class="tool-body">
+                        <div class="mb-3">
+                            <label class="form-label">输入内容</label>
+                            <textarea class="form-control font-monospace" id="properties-input" rows="8" placeholder="输入Properties、YAML或JSON内容"></textarea>
+                        </div>
+                        <div class="btn-group mb-3">
+                            <button class="btn btn-primary" onclick="propertiesToYaml()"><i class="bi bi-arrow-right"></i> Properties → YAML</button>
+                            <button class="btn btn-secondary" onclick="propertiesToJson()"><i class="bi bi-arrow-right"></i> Properties → JSON</button>
+                        </div>
+                        <div class="btn-group mb-3">
+                            <button class="btn btn-info" onclick="yamlToProperties()"><i class="bi bi-arrow-left"></i> YAML → Properties</button>
+                            <button class="btn btn-warning" onclick="jsonToProperties()"><i class="bi bi-arrow-left"></i> JSON → Properties</button>
+                        </div>
+                        <div class="result-area mt-3" id="properties-result-container" style="display:none;">
+                            <label class="form-label">结果</label>
+                            <textarea class="form-control font-monospace" id="properties-result" rows="8" readonly></textarea>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="properties-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-stress-test">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-speedometer2"></i> HTTP接口压测工具</h3>
+                        <p class="text-muted">对HTTP接口进行压力测试，分析性能指标</p>
+                    </div>
+                    <div class="tool-body">
+                        <div class="row mb-3">
+                            <div class="col-md-2">
+                                <label class="form-label">方法</label>
+                                <select class="form-select" id="stress-method">
+                                    <option value="GET">GET</option>
+                                    <option value="POST">POST</option>
+                                    <option value="PUT">PUT</option>
+                                    <option value="DELETE">DELETE</option>
+                                </select>
+                            </div>
+                            <div class="col-md-10">
+                                <label class="form-label">URL</label>
+                                <input type="text" class="form-control font-monospace" id="stress-url" placeholder="https://api.example.com/endpoint" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label class="form-label">并发线程数</label>
+                                <input type="number" class="form-control" id="stress-threads" value="10" min="1" max="100">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">每线程请求数</label>
+                                <input type="number" class="form-control" id="stress-requests-per-thread" value="10" min="1" max="100">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Content-Type</label>
+                                <select class="form-select" id="stress-content-type">
+                                    <option value="application/json">application/json</option>
+                                    <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+                                    <option value="text/plain">text/plain</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label mb-0">请求头</label>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <input type="radio" class="btn-check" name="stress-headers-mode" id="stress-headers-json" value="json" checked>
+                                    <label class="btn btn-outline-primary" for="stress-headers-json">JSON</label>
+                                    <input type="radio" class="btn-check" name="stress-headers-mode" id="stress-headers-kv" value="kv">
+                                    <label class="btn btn-outline-primary" for="stress-headers-kv">键值对</label>
+                                </div>
+                            </div>
+                            <textarea class="form-control font-monospace" id="stress-headers" rows="2" placeholder='{"Authorization": "Bearer xxx"}'></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label mb-0">请求体</label>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <input type="radio" class="btn-check" name="stress-body-mode" id="stress-body-json" value="json" checked>
+                                    <label class="btn btn-outline-primary" for="stress-body-json">JSON</label>
+                                    <input type="radio" class="btn-check" name="stress-body-mode" id="stress-body-form" value="form">
+                                    <label class="btn btn-outline-primary" for="stress-body-form">表单</label>
+                                    <input type="radio" class="btn-check" name="stress-body-mode" id="stress-body-raw" value="raw">
+                                    <label class="btn btn-outline-primary" for="stress-body-raw">原始</label>
+                                </div>
+                            </div>
+                            <textarea class="form-control font-monospace" id="stress-body" rows="3" placeholder='{"key": "value"}'></textarea>
+                        </div>
+                        <button class="btn btn-danger" onclick="runStressTest()" id="stress-test-btn"><i class="bi bi-play-fill"></i> 开始压测</button>
+                        <div class="result-area mt-3" id="stress-result-container" style="display:none;">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-muted">总请求数</h6>
+                                            <h3 class="card-title" id="stress-total-requests">0</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-muted">成功/失败</h6>
+                                            <h3 class="card-title"><span id="stress-success">0</span>/<span id="stress-failure">0</span></h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-muted">QPS</h6>
+                                            <h3 class="card-title" id="stress-qps">0</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-muted">总耗时</h6>
+                                            <h3 class="card-title"><span id="stress-total-time">0</span>ms</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-muted">平均响应时间</h6>
+                                            <h4 class="card-title"><span id="stress-avg-time">0</span>ms</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-muted">最小/最大响应时间</h6>
+                                            <h4 class="card-title"><span id="stress-min-time">0</span>/<span id="stress-max-time">0</span>ms</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-muted">P95/P99</h6>
+                                            <h4 class="card-title"><span id="stress-p95">0</span>/<span id="stress-p99">0</span>ms</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">状态码分布</label>
+                                <div id="stress-status-codes" class="d-flex flex-wrap gap-2"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">响应时间百分位</label>
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>P50</th>
+                                            <th>P75</th>
+                                            <th>P90</th>
+                                            <th>P95</th>
+                                            <th>P99</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td id="stress-p50">0ms</td>
+                                            <td id="stress-p75">0ms</td>
+                                            <td id="stress-p90">0ms</td>
+                                            <td id="stress-p95-row">0ms</td>
+                                            <td id="stress-p99-row">0ms</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="stress-test-history"></div>
+                </div>
+
+                <div class="tool-panel" id="panel-image">
+                    <div class="tool-header">
+                        <h3><i class="bi bi-image"></i> 图片处理工具</h3>
+                        <p class="text-muted">图片压缩、格式转换、缩放和旋转</p>
+                    </div>
+                    <div class="tool-body">
+                        <ul class="nav nav-tabs mb-3" role="tablist">
+                            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#image-compress-tab">图片压缩</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#image-convert-tab">格式转换</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#image-resize-tab">图片缩放</button></li>
+                            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#image-rotate-tab">图片旋转</button></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="image-compress-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">选择图片</label>
+                                    <input type="file" class="form-control" id="image-compress-file" accept="image/*">
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">压缩质量 (0.1-1.0)</label>
+                                        <input type="number" class="form-control" id="image-quality" value="0.8" min="0.1" max="1.0" step="0.1">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">最大宽度</label>
+                                        <input type="number" class="form-control" id="image-max-width" placeholder="不限制">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">最大高度</label>
+                                        <input type="number" class="form-control" id="image-max-height" placeholder="不限制">
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" onclick="compressImage()"><i class="bi bi-compress"></i> 压缩图片</button>
+                            </div>
+                            <div class="tab-pane fade" id="image-convert-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">选择图片</label>
+                                    <input type="file" class="form-control" id="image-convert-file" accept="image/*">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">目标格式</label>
+                                    <select class="form-select" id="image-target-format">
+                                        <option value="jpg">JPG</option>
+                                        <option value="png">PNG</option>
+                                        <option value="gif">GIF</option>
+                                        <option value="bmp">BMP</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary" onclick="convertImage()"><i class="bi bi-arrow-left-right"></i> 转换格式</button>
+                            </div>
+                            <div class="tab-pane fade" id="image-resize-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">选择图片</label>
+                                    <input type="file" class="form-control" id="image-resize-file" accept="image/*">
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">目标宽度</label>
+                                        <input type="number" class="form-control" id="image-resize-width" placeholder="宽度">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">目标高度</label>
+                                        <input type="number" class="form-control" id="image-resize-height" placeholder="高度">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">保持比例</label>
+                                        <select class="form-select" id="image-keep-ratio">
+                                            <option value="true">是</option>
+                                            <option value="false">否</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" onclick="resizeImage()"><i class="bi bi-arrows-angle-contract"></i> 缩放图片</button>
+                            </div>
+                            <div class="tab-pane fade" id="image-rotate-tab">
+                                <div class="mb-3">
+                                    <label class="form-label">选择图片</label>
+                                    <input type="file" class="form-control" id="image-rotate-file" accept="image/*">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">旋转角度</label>
+                                    <select class="form-select" id="image-rotate-angle">
+                                        <option value="90">顺时针90°</option>
+                                        <option value="180">180°</option>
+                                        <option value="270">顺时针270°</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary" onclick="rotateImage()"><i class="bi bi-arrow-clockwise"></i> 旋转图片</button>
+                            </div>
+                        </div>
+                        <div class="result-area mt-3" id="image-result-container" style="display:none;">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-muted">原始大小</h6>
+                                            <h5 class="card-title" id="image-original-size">0 KB</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-muted">处理后大小</h6>
+                                            <h5 class="card-title" id="image-result-size">0 KB</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-muted">原始尺寸</h6>
+                                            <h5 class="card-title" id="image-original-dimension">0x0</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h6 class="card-subtitle mb-2 text-muted">处理后尺寸</h6>
+                                            <h5 class="card-title" id="image-result-dimension">0x0</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">预览</label>
+                                <div class="text-center">
+                                    <img id="image-preview" class="img-fluid" style="max-height: 400px;">
+                                </div>
+                            </div>
+                            <button class="btn btn-success" onclick="downloadImage()"><i class="bi bi-download"></i> 下载图片</button>
+                        </div>
+                    </div>
+                    <div class="tool-history" id="image-history"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal fade" id="historyDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-info-circle me-2"></i>操作详情
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-clock me-1"></i>操作时间
+                        </label>
+                        <p id="detail-time" class="text-muted"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-chat-text me-1"></i>操作描述
+                        </label>
+                        <p id="detail-action" class="text-primary"></p>
+                    </div>
+                    <div class="mb-3" id="detail-input-section" style="display:none;">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>输入数据
+                        </label>
+                        <pre id="detail-input" class="bg-light p-3 rounded" style="max-height: 200px; overflow-y: auto;"></pre>
+                    </div>
+                    <div class="mb-3" id="detail-output-section" style="display:none;">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-box-arrow-right me-1"></i>输出结果
+                        </label>
+                        <pre id="detail-output" class="bg-light p-3 rounded" style="max-height: 400px; overflow-y: auto;"></pre>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="copyDetailBtn">
+                        <i class="bi bi-clipboard me-1"></i>复制结果
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/marked/9.1.2/marked.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script th:src="@{/js/connection-manager.js(v=${#dates.createNow().time})}"></script>
+    <script th:src="@{/js/app.js(v=${#dates.createNow().time})}"></script>
+    <script th:src="@{/js/ai-chat.js(v=${#dates.createNow().time})}"></script>
+    <script th:src="@{/js/new-tools.js(v=${#dates.createNow().time})}"></script>
+</body>
+</html>

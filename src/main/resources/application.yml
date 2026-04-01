@@ -1,0 +1,91 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /tools
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  application:
+    name: developer-tools
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+      file-size-threshold: 2KB
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: false
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    serialization:
+      write-dates-as-timestamps: false
+  datasource:
+    url: jdbc:h2:file:./data/developer-tools;DB_CLOSE_ON_EXIT=FALSE;AUTO_RECONNECT=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+springfox:
+  documentation:
+    enabled: true
+
+cache:
+  caffeine:
+    spec: maximumSize=1000,expireAfterWrite=1h
+
+logging:
+  level:
+    root: INFO
+    com.glmx: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+
+app:
+  upload:
+    max-size: 20971520
+    temp-path: ${java.io.tmpdir}/developer-tools
+  history:
+    max-records: 100
+
+jwt:
+  secret: YourSuperSecretKeyForJWTTokenGenerationMustBeAtLeast256BitsLong
+  expiration: 86400000
+
+ai:
+  openai:
+    api-key: ${OPENAI_API_KEY:}
+    base-url: https://api.openai.com/v1
+  qwen:
+    api-key: ${QWEN_API_KEY:}
+    base-url: https://dashscope.aliyuncs.com/api/v1
+  moonshot:
+    api-key: ${MOONSHOT_API_KEY:}
+    base-url: https://api.moonshot.cn/v1
+  doubao:
+    api-key: ${DOUBAO_API_KEY:}
+    base-url: https://ark.cn-beijing.volces.com/api/v3
+    endpoint-id: ${DOUBAO_ENDPOINT_ID:}
+  deepseek:
+    api-key: ${DEEPSEEK_API_KEY:}
+    base-url: https://api.deepseek.com
