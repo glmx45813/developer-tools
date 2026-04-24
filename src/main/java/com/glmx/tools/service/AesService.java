@@ -50,14 +50,14 @@ public class AesService {
             throw new BusinessException("密钥长度必须是128、192或256位");
         }
         
-        byte[] keyBytes = decodeKey(key, keySize);
+        byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
         
         byte[] ivBytes = null;
         if ("CBC".equals(mode) || "GCM".equals(mode)) {
             if (iv == null || iv.isEmpty()) {
                 ivBytes = generateIvBytes();
             } else {
-                ivBytes = decodeIv(iv);
+                ivBytes = iv.getBytes(StandardCharsets.UTF_8);
             }
         }
         
@@ -112,14 +112,14 @@ public class AesService {
             throw new BusinessException("密钥长度必须是128、192或256位");
         }
         
-        byte[] keyBytes = decodeKey(key, keySize);
+        byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
         
         byte[] ivBytes = null;
         if ("CBC".equals(mode) || "GCM".equals(mode)) {
             if (iv == null || iv.isEmpty()) {
                 throw new BusinessException("CBC/GCM模式需要IV向量");
             }
-            ivBytes = decodeIv(iv);
+            ivBytes = iv.getBytes(StandardCharsets.UTF_8);
         }
         
         try {
